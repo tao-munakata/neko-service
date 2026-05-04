@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     avatar_url      TEXT,
     membership_tier VARCHAR(20)  NOT NULL DEFAULT 'member'
                     CHECK (membership_tier IN ('guest','member','premium')),
+    password        TEXT,
     created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     last_active_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
