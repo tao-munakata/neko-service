@@ -7,17 +7,25 @@ CREATE EXTENSION IF NOT EXISTS "pg_trgm"; -- 日本語部分一致検索用
 
 -- ユーザー
 CREATE TABLE IF NOT EXISTS users (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    nickname        VARCHAR(50)  NOT NULL,
-    phone_number    VARCHAR(20),
-    email           VARCHAR(255),
-    avatar_url      TEXT,
-    membership_tier VARCHAR(20)  NOT NULL DEFAULT 'member'
-                    CHECK (membership_tier IN ('guest','member','premium')),
-    password        TEXT,
-    created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    last_active_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nickname            VARCHAR(50)  NOT NULL,
+    cat_character       VARCHAR(100),                        -- 例: サバトラのニャンタ
+    phone_number        VARCHAR(20),
+    email               VARCHAR(255),
+    avatar_url          TEXT,
+    membership_tier     VARCHAR(20)  NOT NULL DEFAULT 'member'
+                        CHECK (membership_tier IN ('guest','member','premium')),
+    password            TEXT,
+    auth_method         VARCHAR(20)  NOT NULL DEFAULT 'device',  -- 'device' | 'email'
+    device_fingerprint  VARCHAR(255) UNIQUE,                 -- UA+画面+TZ のハッシュ
+    voice_registered    BOOLEAN      NOT NULL DEFAULT FALSE,
+    location_lat        DECIMAL(10,8),
+    location_lng        DECIMAL(11,8),
+    maps_consent        BOOLEAN      NOT NULL DEFAULT FALSE,  -- Google Maps 連動同意
+    created_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    last_active_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_users_device ON users(device_fingerprint);
 
 -- カテゴリ
 CREATE TABLE IF NOT EXISTS categories (
