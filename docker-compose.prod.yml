@@ -14,11 +14,11 @@ services:
     restart: unless-stopped
     networks:
       - neko-net
+      - nyanko-chat_default
 
   frontend:
     image: ghcr.io/tao-munakata/neko-service-frontend:latest
-    environment:
-      - NEXT_PUBLIC_API_URL=https://${DOMAIN_NAME}/api
+    env_file: .env.prod
     expose:
       - "3000"
     restart: unless-stopped
@@ -27,8 +27,7 @@ services:
 
   backend:
     image: ghcr.io/tao-munakata/neko-service-backend:latest
-    env_file:
-      - .env.prod
+    env_file: .env.prod
     expose:
       - "3001"
     depends_on:
@@ -42,15 +41,16 @@ services:
 
   postgres:
     image: postgres:16-alpine
+    env_file: .env.prod
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB:-neko_db}
+      POSTGRES_USER: neko
+      POSTGRES_PASSWORD: neko_Prod_2026!
+      POSTGRES_DB: neko_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U neko"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -60,7 +60,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --maxmemory 64mb --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
     healthcheck:
@@ -75,9 +75,10 @@ services:
   minio:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
+    env_file: .env.prod
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ROOT_USER: nekoMinioAdmin
+      MINIO_ROOT_PASSWORD: MinioNeko_2026!
     volumes:
       - minio_data:/data
     healthcheck:
@@ -97,3 +98,5 @@ volumes:
 networks:
   neko-net:
     driver: bridge
+  nyanko-chat_default:
+    external: true

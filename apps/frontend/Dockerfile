@@ -11,6 +11,8 @@ CMD ["npm", "run", "dev"]
 
 # ── ビルド ────────────────────────────────────────
 FROM base AS builder
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 RUN npm ci
 COPY . .
 RUN npm run build

@@ -1,0 +1,16 @@
+services:
+  frontend:
+    image: neko-frontend:local
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+      target: production
+      args:
+        NEXT_PUBLIC_API_URL: https://nyanko.fun/api
+
+  backend:
+    image: neko-backend:local
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+      target: production
