@@ -105,9 +105,12 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
       imageUrl = uploadRes.data.imageUrl;
     } catch { /* 画像なしで続行 */ }
 
+    const rawText = reviewText.trim() ||
+      (selectedStore ? `${selectedStore.name}に行ってきたにゃん` : '美味しいお店に行ってきたにゃん');
+
     await api.post('/posts', {
       postType: 'answer',
-      rawText: reviewText,
+      rawText,
       categoryId,
       imageUrl,
       storeId: selectedStore?.placeId ?? null,
