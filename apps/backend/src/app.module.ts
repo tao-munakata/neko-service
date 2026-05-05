@@ -10,6 +10,7 @@ import { PostsModule } from './modules/posts/posts.module';
 import { ReactionsModule } from './modules/reactions/reactions.module';
 import { EventsModule } from './modules/events/events.module';
 import { PlacesModule } from './modules/places/places.module';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -24,5 +25,6 @@ import { PlacesModule } from './modules/places/places.module';
     EventsModule,
     PlacesModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}
