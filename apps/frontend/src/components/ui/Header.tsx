@@ -47,7 +47,7 @@ export default function Header() {
                 ログイン
               </Link>
               <Link
-                href="/register-new"
+                href="/register"
                 className="text-sm bg-white text-orange-500 hover:bg-orange-50 px-4 py-1 rounded-full font-bold transition-colors"
               >
                 はじめる
