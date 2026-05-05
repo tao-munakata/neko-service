@@ -21,8 +21,9 @@ jobs:
             set -e
             cd /home/ubuntu/nyanko
 
-            # 最新コードを取得
-            git pull origin main
+            # 最新コードを取得（サーバーのローカル変更は破棄）
+            git fetch origin main
+            git reset --hard origin/main
 
             # バックエンドをビルド・再起動
             docker compose -f docker-compose.prod.yml -f docker-compose.server-build.yml build backend
