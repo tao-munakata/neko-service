@@ -1,100 +1,62 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import api from '@/lib/api';
-import { saveAuth } from '@/lib/auth';
-import type { AuthResponse } from '@/types';
+import CatStepIndicator from '@/components/registration/CatStepIndicator';
+import Step1DeviceInit from '@/components/registration/Step1DeviceInit';
+import Step2Voice from '@/components/registration/Step2Voice';
+import Step3Location from '@/components/registration/Step3Location';
+import Step4Complete from '@/components/registration/Step4Complete';
+
+type Step = 1 | 2 | 3 | 4;
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [nickname, setNickname] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      const res = await api.post<AuthResponse>('/auth/register', { nickname, email, password });
-      saveAuth(res.data);
-      router.push('/');
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setError(msg || '登録できなかったにゃん。もう一度試してほしいにゃん。');
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [step, setStep] = useState<Step>(1);
+  const [userId, setUserId] = useState('');
+  const [catCharacter, setCatCharacter] = useState('');
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#fffdf7] px-4">
+    <main className="min-h-screen bg-[#fffdf7] flex flex-col items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🐱</div>
-          <h1 className="text-2xl font-bold text-gray-800">ねこ寄り道</h1>
-          <p className="text-gray-500 mt-1">新しく登録するにゃん</p>
+        <div className="text-center mb-6">
+          <p className="text-2xl font-bold text-gray-700">ねこ寄り道</p>
+          <p className="text-base text-gray-400 mt-1">はじめましてにゃん！</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border-2 border-orange-100 p-6 flex flex-col gap-4">
-          <div>
-            <label className="block text-base font-medium text-gray-700 mb-2">
-              ニックネーム
-            </label>
-            <input
-              type="text"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              required
-              maxLength={50}
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-orange-400"
-              placeholder="例：さばぞう"
-            />
-            <p className="text-xs text-gray-400 mt-1">本名でなくてもよいにゃん</p>
-          </div>
-          <div>
-            <label className="block text-base font-medium text-gray-700 mb-2">メールアドレス</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-orange-400"
-              placeholder="example@email.com"
-            />
-          </div>
-          <div>
-            <label className="block text-base font-medium text-gray-700 mb-2">パスワード</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-orange-400"
-              placeholder="8文字以上"
-            />
-          </div>
+        <CatStepIndicator currentStep={step} />
 
-          {error && <p className="text-red-500 text-base text-center">{error}</p>}
+        <div className="bg-white rounded-3xl shadow-md border-2 border-orange-100 p-6 min-h-[400px] flex flex-col justify-center">
+          {step === 1 && (
+            <Step1DeviceInit
+              onNext={(id, cat) => {
+                setUserId(id);
+                setCatCharacter(cat);
+                setStep(2);
+              }}
+              onAlreadyRegistered={() => setStep(4)}
+            />
+          )}
+          {step === 2 && (
+            <Step2Voice
+              userId={userId}
+              catCharacter={catCharacter}
+              onNext={() => setStep(3)}
+            />
+          )}
+          {step === 3 && (
+            <Step3Location
+              userId={userId}
+              catCharacter={catCharacter}
+              onNext={() => setStep(4)}
+            />
+          )}
+          {step === 4 && (
+            <Step4Complete catCharacter={catCharacter} />
+          )}
+        </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg rounded-xl transition-colors disabled:opacity-50"
-          >
-            {loading ? '登録中にゃん…' : '登録するにゃん'}
-          </button>
-        </form>
-
-        <p className="text-center mt-6 text-base text-gray-500">
-          すでに登録済みの方は{' '}
-          <Link href="/login" className="text-orange-500 font-bold hover:underline">
-            ログインするにゃん
-          </Link>
+        <p className="text-center text-xs text-gray-400 mt-6 leading-relaxed">
+          登録することで、位置情報・音声の取り扱いについての
+          <a href="/privacy" className="text-orange-400 underline">プライバシーポリシー</a>
+          に同意したことになるにゃん
         </p>
       </div>
     </main>
