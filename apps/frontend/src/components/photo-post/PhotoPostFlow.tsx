@@ -61,6 +61,7 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
   const [rating, setRating] = useState<number>(5);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number>(categoryId ?? 1);
   const [isSearching, setIsSearching] = useState(false);
+  const [uploadError, setUploadError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleFileSelect(file: File) {
@@ -104,7 +105,10 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       imageUrl = uploadRes.data.imageUrl;
-    } catch { /* 画像なしで続行 */ }
+    } catch {
+      setUploadError(true);
+      /* 画像なしで続行 */
+    }
 
     const rawText = reviewText.trim() ||
       (selectedStore ? `${selectedStore.name}に行ってきたにゃん` : '美味しいお店に行ってきたにゃん');
@@ -211,7 +215,7 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
 
           {/* STEP: 完了 */}
           {step === 'done' && (
-            <PostComplete onClose={onClose} />
+            <PostComplete onClose={onClose} uploadError={uploadError} />
           )}
         </div>
       </div>

@@ -5,8 +5,9 @@ import Header from '@/components/ui/Header';
 import PostCard from '@/components/post/PostCard';
 import VoicePostForm from '@/components/voice/VoicePostForm';
 import api from '@/lib/api';
-import { isLoggedIn } from '@/lib/auth';
-import type { Post } from '@/types';
+import { isLoggedIn, saveAuth } from '@/lib/auth';
+import { getDeviceFingerprint, getUserAgent } from '@/lib/device';
+import type { Post, AuthResponse } from '@/types';
 
 const REACTION_LABELS: Record<string, string> = {
   thanks: '🙏 ありがとうにゃん',
@@ -41,9 +42,28 @@ export default function PostDetailPage() {
 
   useEffect(() => { fetchData(); }, [id]);
 
+  async function ensureLoggedIn(): Promise<boolean> {
+    if (isLoggedIn()) return true;
+    try {
+      const fingerprint = await getDeviceFingerprint();
+      const ua = getUserAgent();
+      const res = await api.post('/registration/init', { deviceFingerprint: fingerprint, userAgent: ua });
+      const { status, data, accessToken, refreshToken } = res.data;
+      if (status === 'already_registered' && accessToken) {
+        saveAuth({ accessToken, refreshToken, user: { id: data.userId, nickname: data.nickname ?? data.catCharacter, email: null, membershipTier: 'member', avatarUrl: null } } as AuthResponse);
+        return true;
+      }
+      router.push('/register');
+      return false;
+    } catch {
+      router.push('/login');
+      return false;
+    }
+  }
+
   async function handleReaction(type: string) {
-    if (!isLoggedIn()) { router.push('/login'); return; }
     if (reacting || reactedTypes.has(type)) return;
+    if (!await ensureLoggedIn()) return;
     setReacting(true);
     try {
       await api.post(`/posts/${id}/reactions`, { type });
@@ -119,8 +139,8 @@ export default function PostDetailPage() {
           <div className="mt-8">
             {!showReplyForm ? (
               <button
-                onClick={() => {
-                  if (!isLoggedIn()) { router.push('/login'); return; }
+                onClick={async () => {
+                  if (!await ensureLoggedIn()) return;
                   setShowReplyForm(true);
                 }}
                 className="w-full py-4 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold text-lg transition-colors"

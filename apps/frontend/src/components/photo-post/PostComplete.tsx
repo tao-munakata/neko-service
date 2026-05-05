@@ -3,9 +3,10 @@ import { useEffect } from 'react';
 
 interface Props {
   onClose: () => void;
+  uploadError?: boolean;
 }
 
-export default function PostComplete({ onClose }: Props) {
+export default function PostComplete({ onClose, uploadError }: Props) {
   useEffect(() => {
     const t = setTimeout(onClose, 4000);
     return () => clearTimeout(t);
@@ -19,6 +20,9 @@ export default function PostComplete({ onClose }: Props) {
         みんなの役に立つにゃん！<br />
         ありがとうにゃん！
       </p>
+      {uploadError && (
+        <p className="text-sm text-orange-400 mt-4">写真の保存に失敗したにゃん。文章だけ投稿されたにゃん。</p>
+      )}
       <p className="text-sm text-gray-400 mt-6">もうすぐ閉じるにゃん…</p>
     </div>
   );
