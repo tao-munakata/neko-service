@@ -21,6 +21,7 @@ export default () => ({
     bucket: process.env.MINIO_BUCKET || 'neko-media',
     rootUser: process.env.MINIO_ROOT_USER || 'minioadmin',
     rootPassword: process.env.MINIO_ROOT_PASSWORD || 'minioadmin',
+    publicUrl: process.env.MINIO_PUBLIC_URL || '',
   },
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   googlePlaces: {

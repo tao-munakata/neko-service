@@ -10,14 +10,17 @@ export class VoiceService implements OnModuleInit {
   private readonly logger = new Logger(VoiceService.name);
   private readonly client: Minio.Client;
   private readonly bucket: string;
+  private readonly endpoint: string;
+  private readonly publicUrl: string;
 
   constructor(
     private readonly config: ConfigService,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
   ) {
-    const endpoint = config.get<string>('minio.endpoint') || 'http://minio:9000';
-    const url = new URL(endpoint);
+    this.endpoint = config.get<string>('minio.endpoint') || 'http://minio:9000';
+    const url = new URL(this.endpoint);
     this.bucket = config.get<string>('minio.bucket') || 'neko-media';
+    this.publicUrl = config.get<string>('minio.publicUrl') || '';
     this.client = new Minio.Client({
       endPoint: url.hostname,
       port: url.port ? parseInt(url.port, 10) : 9000,
@@ -37,6 +40,12 @@ export class VoiceService implements OnModuleInit {
     } catch (e) {
       this.logger.warn('MinIO bucket init failed (service may not be ready):', e);
     }
+  }
+
+  // 内部URLを公開URLに変換（nginx proxy経由でブラウザからアクセスできるよう）
+  private toPublicUrl(presignedUrl: string): string {
+    if (!this.publicUrl) return presignedUrl;
+    return presignedUrl.replace(this.endpoint, this.publicUrl);
   }
 
   async uploadVoice(
@@ -76,7 +85,8 @@ export class VoiceService implements OnModuleInit {
     });
 
     // プリサインドURLを返す（1年有効）
-    return this.client.presignedGetObject(this.bucket, objectName, 365 * 24 * 3600);
+    const presigned = await this.client.presignedGetObject(this.bucket, objectName, 365 * 24 * 3600);
+    return this.toPublicUrl(presigned);
   }
 
   async getPresignedUrl(userId: string): Promise<string | null> {
@@ -89,7 +99,8 @@ export class VoiceService implements OnModuleInit {
     const objectName = user.voiceUrl.slice(slashIdx + 1);
 
     try {
-      return await this.client.presignedGetObject(this.bucket, objectName, 3600);
+      const presigned = await this.client.presignedGetObject(this.bucket, objectName, 3600);
+      return this.toPublicUrl(presigned);
     } catch (e) {
       this.logger.warn(`Presigned URL generation failed for ${userId}:`, e);
       return null;
