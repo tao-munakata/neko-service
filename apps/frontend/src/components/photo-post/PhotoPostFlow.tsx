@@ -59,6 +59,7 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
   const [selectedStore, setSelectedStore] = useState<SelectedStore | null>(null);
   const [reviewText, setReviewText] = useState('');
   const [rating, setRating] = useState<number>(5);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number>(categoryId ?? 1);
   const [isSearching, setIsSearching] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -111,7 +112,7 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
     await api.post('/posts', {
       postType: 'answer',
       rawText,
-      categoryId,
+      categoryId: selectedCategoryId,
       imageUrl,
       storeId: selectedStore?.placeId ?? null,
       storeName: selectedStore?.name ?? null,
@@ -199,8 +200,10 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
               store={selectedStore}
               reviewText={reviewText}
               rating={rating}
+              categoryId={selectedCategoryId}
               onChangeText={setReviewText}
               onChangeRating={setRating}
+              onChangeCategoryId={setSelectedCategoryId}
               onPost={handlePost}
               onBack={() => setStep('voice')}
             />

@@ -2,20 +2,27 @@
 import { useState } from 'react';
 import type { SelectedStore } from './PhotoPostFlow';
 
+const CATEGORIES = [
+  { id: 1, name: '昭和の喫茶店', emoji: '☕' },
+  { id: 2, name: '魚の旨い店', emoji: '🐟' },
+];
+
 interface Props {
   imagePreviewUrl: string | null;
   store: SelectedStore | null;
   reviewText: string;
   rating: number;
+  categoryId: number;
   onChangeText: (t: string) => void;
   onChangeRating: (r: number) => void;
+  onChangeCategoryId: (id: number) => void;
   onPost: () => Promise<void>;
   onBack: () => void;
 }
 
 export default function ReviewConfirm({
-  imagePreviewUrl, store, reviewText, rating,
-  onChangeText, onChangeRating, onPost, onBack,
+  imagePreviewUrl, store, reviewText, rating, categoryId,
+  onChangeText, onChangeRating, onChangeCategoryId, onPost, onBack,
 }: Props) {
   const [isPosting, setIsPosting] = useState(false);
 
@@ -42,6 +49,26 @@ export default function ReviewConfirm({
           <p className="text-sm text-gray-500">{store.address}</p>
         </div>
       )}
+
+      {/* カテゴリ選択 */}
+      <div className="mb-4">
+        <p className="text-base font-bold text-gray-700 mb-2">カテゴリ</p>
+        <div className="flex gap-3">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => onChangeCategoryId(cat.id)}
+              className={`flex-1 py-3 rounded-xl font-medium text-base transition-colors ${
+                categoryId === cat.id
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {cat.emoji} {cat.name}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* 星評価 */}
       <div className="flex justify-center gap-2 mb-4">
