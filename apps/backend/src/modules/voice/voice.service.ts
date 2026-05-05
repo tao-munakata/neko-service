@@ -37,6 +37,17 @@ export class VoiceService implements OnModuleInit {
         await this.client.makeBucket(this.bucket, 'ap-northeast-1');
         this.logger.log(`MinIO bucket created: ${this.bucket}`);
       }
+      // 画像の公開読み取りポリシーを設定
+      const policy = JSON.stringify({
+        Version: '2012-10-17',
+        Statement: [{
+          Effect: 'Allow',
+          Principal: { AWS: ['*'] },
+          Action: ['s3:GetObject'],
+          Resource: [`arn:aws:s3:::${this.bucket}/images/*`],
+        }],
+      });
+      await this.client.setBucketPolicy(this.bucket, policy);
     } catch (e) {
       this.logger.warn('MinIO bucket init failed (service may not be ready):', e);
     }
@@ -84,9 +95,9 @@ export class VoiceService implements OnModuleInit {
       'Content-Type': mimeType,
     });
 
-    // プリサインドURLを返す（1年有効）
-    const presigned = await this.client.presignedGetObject(this.bucket, objectName, 365 * 24 * 3600);
-    return this.toPublicUrl(presigned);
+    // バケットが公開読み取りなので直接URLを返す（期限切れなし）
+    const directUrl = `${this.endpoint}/${this.bucket}/${objectName}`;
+    return this.toPublicUrl(directUrl);
   }
 
   async getPresignedUrl(userId: string): Promise<string | null> {
