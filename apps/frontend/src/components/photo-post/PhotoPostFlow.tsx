@@ -101,9 +101,7 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
     try {
       const form = new FormData();
       form.append('image', imageFile);
-      const uploadRes = await api.post('/posts/upload-image', form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const uploadRes = await api.post('/posts/upload-image', form);
       imageUrl = uploadRes.data.imageUrl;
     } catch {
       setUploadError(true);
