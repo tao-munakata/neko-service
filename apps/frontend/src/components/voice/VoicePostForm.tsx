@@ -63,12 +63,12 @@ export default function VoicePostForm({ parentPostId, defaultPostType = 'questio
     };
 
     recognition.onend = () => {
-      if (step === 'recording') setStep('idle');
+      setStep((prev) => prev === 'recording' ? 'idle' : prev);
     };
 
     recognitionRef.current = recognition;
     recognition.start();
-  }, [step]);
+  }, []);
 
   const stopRecording = useCallback(() => {
     recognitionRef.current?.stop();
