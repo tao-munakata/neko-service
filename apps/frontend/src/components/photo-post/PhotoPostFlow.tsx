@@ -96,16 +96,22 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
   async function handlePost() {
     if (!imageFile) return;
 
-    // 画像をMinIOにアップロード
+    // 画像をMinIOにアップロード（native fetchでContent-Type boundary問題を回避）
     let imageUrl: string | null = null;
     try {
       const form = new FormData();
       form.append('image', imageFile);
-      const uploadRes = await api.post('/posts/upload-image', form);
-      imageUrl = uploadRes.data.imageUrl;
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+      const uploadRes = await fetch('/api/posts/upload-image', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: form,
+      });
+      if (!uploadRes.ok) throw new Error('upload failed');
+      const uploadData = await uploadRes.json();
+      imageUrl = uploadData.imageUrl;
     } catch {
       setUploadError(true);
-      /* 画像なしで続行 */
     }
 
     const rawText = reviewText.trim() ||
