@@ -1,5 +1,5 @@
 import {
-  Controller, Post, Delete, Body, Param, UseGuards,
+  Controller, Get, Post, Delete, Body, Param, UseGuards,
   ParseUUIDPipe, HttpCode, HttpStatus, ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,13 +12,27 @@ import type { ReactionType } from './reaction.entity';
 import { AddReactionDto } from './dto/reaction.dto';
 
 @Controller('posts/:postId/reactions')
-@UseGuards(JwtAuthGuard)
 export class ReactionsController {
   constructor(
     @InjectRepository(Reaction) private readonly repo: Repository<Reaction>,
   ) {}
 
+  @Get()
+  async counts(@Param('postId', ParseUUIDPipe) postId: string) {
+    const rows = await this.repo
+      .createQueryBuilder('r')
+      .select('r.type', 'type')
+      .addSelect('COUNT(*)', 'count')
+      .where('r.postId = :postId', { postId })
+      .groupBy('r.type')
+      .getRawMany();
+    const result: Record<string, number> = { thanks: 0, helpful: 0, went_there: 0 };
+    rows.forEach(r => { result[r.type] = parseInt(r.count, 10); });
+    return result;
+  }
+
   @Post()
+  @UseGuards(JwtAuthGuard)
   async add(
     @Param('postId', ParseUUIDPipe) postId: string,
     @CurrentUser() user: User,

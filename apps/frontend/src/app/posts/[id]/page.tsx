@@ -23,16 +23,19 @@ export default function PostDetailPage() {
   const [loading, setLoading] = useState(true);
   const [reacting, setReacting] = useState(false);
   const [reactedTypes, setReactedTypes] = useState<Set<string>>(new Set());
+  const [reactionCounts, setReactionCounts] = useState<Record<string, number>>({ thanks: 0, helpful: 0, went_there: 0 });
   const [showReplyForm, setShowReplyForm] = useState(false);
 
   async function fetchData() {
     try {
-      const [postRes, answersRes] = await Promise.all([
+      const [postRes, answersRes, countsRes] = await Promise.all([
         api.get<Post>(`/posts/${id}`),
         api.get<Post[]>(`/posts/${id}/answers`),
+        api.get<Record<string, number>>(`/posts/${id}/reactions`),
       ]);
       setPost(postRes.data);
       setAnswers(answersRes.data);
+      setReactionCounts(countsRes.data);
     } catch {
       router.push('/');
     } finally {
@@ -68,6 +71,7 @@ export default function PostDetailPage() {
     try {
       await api.post(`/posts/${id}/reactions`, { type });
       setReactedTypes(prev => new Set([...prev, type]));
+      setReactionCounts(prev => ({ ...prev, [type]: (prev[type] ?? 0) + 1 }));
     } catch { /* 重複は無視 */ } finally {
       setReacting(false);
     }
@@ -103,6 +107,7 @@ export default function PostDetailPage() {
         <div className="flex gap-2 mt-4 flex-wrap">
           {Object.entries(REACTION_LABELS).map(([type, label]) => {
             const reacted = reactedTypes.has(type);
+            const count = reactionCounts[type] ?? 0;
             return (
               <button
                 key={type}
@@ -114,7 +119,12 @@ export default function PostDetailPage() {
                     : 'bg-orange-50 hover:bg-orange-100 text-orange-700'
                 } disabled:cursor-default`}
               >
-                {reacted ? '✓ 送ったにゃん' : label}
+                <div>{reacted ? '✓ 送ったにゃん' : label}</div>
+                {count > 0 && (
+                  <div className={`text-xs mt-0.5 ${reacted ? 'text-orange-100' : 'text-orange-400'}`}>
+                    {count}にゃん
+                  </div>
+                )}
               </button>
             );
           })}
