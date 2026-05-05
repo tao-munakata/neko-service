@@ -1,16 +1,29 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindManyOptions } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Post } from './post.entity';
 import { NekoAiService } from '../ai/neko-ai.service';
 import { CreatePostDto } from './dto/post.dto';
 
 @Injectable()
 export class PostsService {
+  private readonly minioEndpoint: string;
+  private readonly minioPublicUrl: string;
+
   constructor(
     @InjectRepository(Post) private readonly repo: Repository<Post>,
     private readonly nekoAi: NekoAiService,
-  ) {}
+    private readonly config: ConfigService,
+  ) {
+    this.minioEndpoint = config.get<string>('minio.endpoint') || 'http://minio:9000';
+    this.minioPublicUrl = config.get<string>('minio.publicUrl') || '';
+  }
+
+  private toPublicUrl(url: string | null): string | null {
+    if (!url || !this.minioPublicUrl) return url;
+    return url.replace(this.minioEndpoint, this.minioPublicUrl);
+  }
 
   async create(userId: string, dto: CreatePostDto): Promise<Post> {
     const nekoText = await this.nekoAi.convertToNekoText(dto.rawText);
@@ -52,6 +65,7 @@ export class PostsService {
       skip: query.offset ?? 0,
       relations: ['user', 'category'],
     });
+    posts.forEach(p => { p.imageUrl = this.toPublicUrl(p.imageUrl); });
     return { posts, total };
   }
 
@@ -61,6 +75,7 @@ export class PostsService {
       relations: ['user', 'category'],
     });
     if (!post) throw new NotFoundException('投稿が見つからないにゃん');
+    post.imageUrl = this.toPublicUrl(post.imageUrl);
     return post;
   }
 

@@ -17,9 +17,8 @@ export default function Header() {
 
   function handleLogout() {
     clearAuth();
-    // このセッション中は自動ログインしないフラグ
     sessionStorage.setItem('logged_out', '1');
-    router.push('/');
+    window.location.href = '/';
   }
 
   return (

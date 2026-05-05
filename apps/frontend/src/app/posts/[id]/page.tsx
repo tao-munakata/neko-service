@@ -21,6 +21,7 @@ export default function PostDetailPage() {
   const [answers, setAnswers] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [reacting, setReacting] = useState(false);
+  const [reactedTypes, setReactedTypes] = useState<Set<string>>(new Set());
   const [showReplyForm, setShowReplyForm] = useState(false);
 
   async function fetchData() {
@@ -42,10 +43,11 @@ export default function PostDetailPage() {
 
   async function handleReaction(type: string) {
     if (!isLoggedIn()) { router.push('/login'); return; }
-    if (reacting) return;
+    if (reacting || reactedTypes.has(type)) return;
     setReacting(true);
     try {
       await api.post(`/posts/${id}/reactions`, { type });
+      setReactedTypes(prev => new Set([...prev, type]));
     } catch { /* 重複は無視 */ } finally {
       setReacting(false);
     }
@@ -79,16 +81,23 @@ export default function PostDetailPage() {
 
         {/* リアクションボタン */}
         <div className="flex gap-2 mt-4 flex-wrap">
-          {Object.entries(REACTION_LABELS).map(([type, label]) => (
-            <button
-              key={type}
-              onClick={() => handleReaction(type)}
-              disabled={reacting}
-              className="flex-1 py-3 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-700 font-medium text-sm transition-colors disabled:opacity-50"
-            >
-              {label}
-            </button>
-          ))}
+          {Object.entries(REACTION_LABELS).map(([type, label]) => {
+            const reacted = reactedTypes.has(type);
+            return (
+              <button
+                key={type}
+                onClick={() => handleReaction(type)}
+                disabled={reacting || reacted}
+                className={`flex-1 py-3 rounded-xl font-medium text-sm transition-all ${
+                  reacted
+                    ? 'bg-orange-500 text-white scale-95'
+                    : 'bg-orange-50 hover:bg-orange-100 text-orange-700'
+                } disabled:cursor-default`}
+              >
+                {reacted ? '✓ 送ったにゃん' : label}
+              </button>
+            );
+          })}
         </div>
 
         {/* 回答一覧 */}
