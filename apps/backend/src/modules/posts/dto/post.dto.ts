@@ -1,5 +1,5 @@
 import {
-  IsString, IsNotEmpty, IsOptional, IsIn, IsNumber, IsUUID, Length,
+  IsString, IsNotEmpty, IsOptional, IsIn, IsNumber, IsUUID, Length, IsBoolean, Min, Max,
 } from 'class-validator';
 
 export class CreatePostDto {
@@ -30,6 +30,33 @@ export class CreatePostDto {
   @IsOptional()
   @IsString()
   imageUrl?: string;
+
+  // v1.7: 写真投稿連動
+  @IsOptional()
+  @IsString()
+  storeId?: string;
+
+  @IsOptional()
+  @IsString()
+  storeName?: string;
+
+  @IsOptional()
+  @IsString()
+  storeAddress?: string;
+
+  @IsOptional()
+  @IsString()
+  googleMapsUrl?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(5)
+  rating?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  affiliateFlag?: boolean;
 }
 
 export class ListPostsQueryDto {

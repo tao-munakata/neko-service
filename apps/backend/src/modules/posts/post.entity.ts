@@ -48,6 +48,27 @@ export class Post {
   @Column({ name: 'location_text', type: 'varchar', length: 100, nullable: true })
   locationText: string | null;
 
+  @Column({ name: 'store_id', type: 'varchar', length: 255, nullable: true })
+  storeId: string | null;
+
+  @Column({ name: 'store_name', type: 'varchar', length: 255, nullable: true })
+  storeName: string | null;
+
+  @Column({ name: 'store_address', type: 'text', nullable: true })
+  storeAddress: string | null;
+
+  @Column({ name: 'google_maps_url', type: 'text', nullable: true })
+  googleMapsUrl: string | null;
+
+  @Column({ name: 'rating', type: 'smallint', nullable: true })
+  rating: number | null;
+
+  @Column({ name: 'affiliate_flag', type: 'boolean', default: false })
+  affiliateFlag: boolean;
+
+  @Column({ name: 'google_maps_posted', type: 'boolean', default: false })
+  googleMapsPosted: boolean;
+
   @Column({ type: 'varchar', default: 'active' })
   status: PostStatus;
 

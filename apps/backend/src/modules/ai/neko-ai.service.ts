@@ -49,6 +49,29 @@ export class NekoAiService {
     }
   }
 
+  /** 音声書き起こしテキストを自然な口コミ文に整形（にゃん変換なし） */
+  async formatReview(rawSpeech: string, storeName: string): Promise<string> {
+    if (!rawSpeech?.trim()) return rawSpeech;
+    try {
+      const message = await this.client.messages.create({
+        model: this.model,
+        max_tokens: 300,
+        messages: [{
+          role: 'user',
+          content: `以下の音声書き起こしを、「${storeName}」への自然な口コミ文に整形してください。
+話し言葉のまま・冗長な表現は整理し、1〜3文で完結させてください。
+語尾変換（にゃん等）は不要です。整形後のテキストのみ返してください。
+
+書き起こし: 「${rawSpeech}」`,
+        }],
+      });
+      const content = message.content[0];
+      return content.type === 'text' ? content.text.trim() : rawSpeech;
+    } catch {
+      return rawSpeech;
+    }
+  }
+
   async generateIsolationAlert(nickname: string, questionText: string): Promise<string> {
     try {
       const message = await this.client.messages.create({

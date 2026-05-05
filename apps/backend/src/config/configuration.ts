@@ -23,4 +23,7 @@ export default () => ({
     rootPassword: process.env.MINIO_ROOT_PASSWORD || 'minioadmin',
   },
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+  googlePlaces: {
+    apiKey: process.env.GOOGLE_PLACES_API_KEY || '',
+  },
 });

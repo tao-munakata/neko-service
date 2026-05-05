@@ -27,27 +27,25 @@ export default function VoicePostForm({ parentPostId, defaultPostType = 'questio
   const [locationText, setLocationText] = useState('');
   const [error, setError] = useState('');
 
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<InstanceType<typeof SpeechRecognition> | null>(null);
 
   const startRecording = useCallback(() => {
     setError('');
-    const SpeechRecognition =
-      (window as unknown as { SpeechRecognition?: typeof globalThis.SpeechRecognition; webkitSpeechRecognition?: typeof globalThis.SpeechRecognition }).SpeechRecognition ||
-      (window as unknown as { webkitSpeechRecognition?: typeof globalThis.SpeechRecognition }).webkitSpeechRecognition;
+    const SR = window.SpeechRecognition ?? window.webkitSpeechRecognition;
 
-    if (!SpeechRecognition) {
+    if (!SR) {
       setError('このブラウザは音声入力に対応していないにゃん。テキストで入力してほしいにゃん。');
       return;
     }
 
-    const recognition = new SpeechRecognition();
+    const recognition = new SR();
     recognition.lang = 'ja-JP';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => setStep('recording');
 
-    recognition.onresult = async (event) => {
+    recognition.onresult = async (event: SpeechRecognitionEvent) => {
       const text = event.results[0][0].transcript;
       setRawText(text);
       setStep('preview');

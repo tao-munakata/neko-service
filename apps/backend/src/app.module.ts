@@ -9,6 +9,7 @@ import { VoiceModule } from './modules/voice/voice.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { ReactionsModule } from './modules/reactions/reactions.module';
 import { EventsModule } from './modules/events/events.module';
+import { PlacesModule } from './modules/places/places.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { EventsModule } from './modules/events/events.module';
     PostsModule,
     ReactionsModule,
     EventsModule,
+    PlacesModule,
   ],
 })
 export class AppModule {}

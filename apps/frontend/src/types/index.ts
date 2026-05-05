@@ -1,9 +1,11 @@
 export interface User {
   id: string;
   nickname: string;
-  email: string;
+  email: string | null;
   membershipTier: 'guest' | 'member' | 'premium';
   avatarUrl: string | null;
+  voiceRegistered?: boolean;
+  voiceGender?: string;
 }
 
 export interface Category {
@@ -24,6 +26,12 @@ export interface Post {
   category: Category | null;
   layer: 'yorimichi' | 'tamariba';
   locationText: string | null;
+  // v1.7: 写真投稿連動
+  storeId: string | null;
+  storeName: string | null;
+  storeAddress: string | null;
+  googleMapsUrl: string | null;
+  rating: number | null;
   status: 'active' | 'hidden' | 'deleted';
   createdAt: string;
   user: User;

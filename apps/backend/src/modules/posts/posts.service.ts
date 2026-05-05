@@ -24,6 +24,12 @@ export class PostsService {
       layer: dto.layer ?? 'yorimichi',
       locationText: dto.locationText ?? null,
       imageUrl: dto.imageUrl ?? null,
+      storeId: dto.storeId ?? null,
+      storeName: dto.storeName ?? null,
+      storeAddress: dto.storeAddress ?? null,
+      googleMapsUrl: dto.googleMapsUrl ?? null,
+      rating: dto.rating ?? null,
+      affiliateFlag: dto.affiliateFlag ?? false,
     });
     return this.repo.save(post);
   }

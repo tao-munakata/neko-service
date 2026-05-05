@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS users (
     location_lat        DECIMAL(10,8),
     location_lng        DECIMAL(11,8),
     maps_consent        BOOLEAN      NOT NULL DEFAULT FALSE,  -- Google Maps 連動同意
+    voice_url           TEXT,                                -- MinIO に保存した声の URL
+    voice_gender        VARCHAR(20)  DEFAULT 'unknown',      -- 'male' | 'female' | 'unknown'
     created_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     last_active_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
@@ -43,20 +45,28 @@ ON CONFLICT (slug) DO NOTHING;
 
 -- 投稿
 CREATE TABLE IF NOT EXISTS posts (
-    id             UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id        UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    post_type      VARCHAR(20)  NOT NULL CHECK (post_type IN ('question','answer')),
-    parent_post_id UUID         REFERENCES posts(id) ON DELETE SET NULL,
-    raw_text       TEXT,
-    neko_text      TEXT         NOT NULL,
-    image_url      TEXT,
-    category_id    INT          REFERENCES categories(id),
-    layer          VARCHAR(20)  NOT NULL DEFAULT 'yorimichi'
-                   CHECK (layer IN ('yorimichi','tamariba')),
-    location_text  VARCHAR(100),
-    status         VARCHAR(20)  NOT NULL DEFAULT 'active'
-                   CHECK (status IN ('active','hidden','deleted')),
-    created_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id           UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    post_type         VARCHAR(20)  NOT NULL CHECK (post_type IN ('question','answer')),
+    parent_post_id    UUID         REFERENCES posts(id) ON DELETE SET NULL,
+    raw_text          TEXT,
+    neko_text         TEXT         NOT NULL,
+    image_url         TEXT,
+    category_id       INT          REFERENCES categories(id),
+    layer             VARCHAR(20)  NOT NULL DEFAULT 'yorimichi'
+                      CHECK (layer IN ('yorimichi','tamariba')),
+    location_text     VARCHAR(100),
+    -- v1.7: 写真投稿連動（Google Places連携）
+    store_id          VARCHAR(255),                          -- Google Place ID
+    store_name        VARCHAR(255),                          -- 店名
+    store_address     TEXT,                                  -- 住所
+    google_maps_url   TEXT,                                  -- Google Maps URL
+    rating            SMALLINT     CHECK (rating BETWEEN 1 AND 5),
+    affiliate_flag    BOOLEAN      NOT NULL DEFAULT FALSE,   -- アフィリエイト連携許可
+    google_maps_posted BOOLEAN     NOT NULL DEFAULT FALSE,   -- Google MAP投稿済み
+    status            VARCHAR(20)  NOT NULL DEFAULT 'active'
+                      CHECK (status IN ('active','hidden','deleted')),
+    created_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_posts_category_created  ON posts(category_id, created_at DESC);

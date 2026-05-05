@@ -49,6 +49,12 @@ export class User {
   @Column({ name: 'maps_consent', type: 'boolean', default: false })
   mapsConsent: boolean;
 
+  @Column({ name: 'voice_url', type: 'text', nullable: true })
+  voiceUrl: string | null;
+
+  @Column({ name: 'voice_gender', type: 'varchar', length: 20, default: 'unknown' })
+  voiceGender: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
