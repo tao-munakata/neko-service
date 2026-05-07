@@ -68,17 +68,26 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
     setIsSearching(true);
     setStep('store');
 
-    // ExifからGPS取得、なければ現在地
-    let gps = await extractGps(file);
-    if (!gps) gps = await getCurrentGps();
+    try {
+      // iOS では位置情報許可ダイアログ待ちで getCurrentPosition が無限待機することがあるため
+      // 10秒のハードタイムアウトを設ける
+      const gps = await Promise.race<{ lat: number; lng: number } | null>([
+        (async () => {
+          const exifGps = await extractGps(file);
+          return exifGps ?? await getCurrentGps();
+        })(),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 10000)),
+      ]);
 
-    if (gps) {
-      try {
-        const res = await api.post('/places/nearby', { lat: gps.lat, lng: gps.lng });
-        setCandidates(res.data.candidates ?? []);
-      } catch { /* ignore */ }
+      if (gps) {
+        try {
+          const res = await api.post('/places/nearby', { lat: gps.lat, lng: gps.lng });
+          setCandidates(res.data.candidates ?? []);
+        } catch { /* ignore */ }
+      }
+    } finally {
+      setIsSearching(false);
     }
-    setIsSearching(false);
   }
 
   function handleStoreSelected(store: SelectedStore | null) {
