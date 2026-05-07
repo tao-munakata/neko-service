@@ -84,6 +84,9 @@ export default function HomePage() {
           <p className="text-gray-500 text-base">
             地元のご馳走・お福分け
           </p>
+          <p className="text-gray-300 text-xs mt-1">
+            {process.env.NEXT_PUBLIC_APP_VERSION}
+          </p>
         </div>
 
         <PostFeed />
