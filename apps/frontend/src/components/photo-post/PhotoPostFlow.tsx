@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import api from '@/lib/api';
 import StoreConfirm from './StoreConfirm';
 import VoiceComment from './VoiceComment';
@@ -62,8 +62,6 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number>(categoryId ?? 1);
   const [isSearching, setIsSearching] = useState(false);
   const [uploadError, setUploadError] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   async function handleFileSelect(file: File) {
     setImageFile(file);
     setImagePreviewUrl(URL.createObjectURL(file));
@@ -156,20 +154,16 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
               <p className="text-2xl text-orange-600 font-bold mb-6">
                 美味しそうな写真を見せてほしいにゃん！
               </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full py-8 bg-orange-500 hover:bg-orange-600 text-white text-2xl font-bold rounded-3xl shadow-xl mb-4 transition-transform hover:scale-105 active:scale-95"
-              >
+              <label className="w-full py-8 bg-orange-500 hover:bg-orange-600 text-white text-2xl font-bold rounded-3xl shadow-xl mb-4 transition-transform hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center">
                 📸 写真を撮るにゃん
-              </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+                />
+              </label>
               <label className="w-full py-5 border-2 border-orange-300 text-orange-600 text-xl font-bold rounded-2xl cursor-pointer flex items-center justify-center">
                 🖼️ ライブラリから選ぶにゃん
                 <input
