@@ -28,7 +28,7 @@ export class PlacesService {
 
     const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
     url.searchParams.set('location', `${lat},${lng}`);
-    url.searchParams.set('radius', '100');          // 100m以内
+    url.searchParams.set('radius', '500');          // 500m以内
     url.searchParams.set('type', 'restaurant');
     url.searchParams.set('language', 'ja');
     url.searchParams.set('key', this.apiKey);
@@ -38,7 +38,7 @@ export class PlacesService {
     const data = await res.json() as PlacesNearbyResponse;
 
     if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-      this.logger.warn(`Places API status: ${data.status}`);
+      this.logger.warn(`Places API status: ${data.status} / ${data.error_message ?? 'no message'}`);
       return [];
     }
 
@@ -83,6 +83,7 @@ export class PlacesService {
 // ── Places API レスポンス型（必要フィールドのみ） ───────────────
 interface PlacesNearbyResponse {
   status: string;
+  error_message?: string;
   results: Array<{
     place_id: string;
     name: string;
