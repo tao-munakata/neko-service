@@ -222,7 +222,12 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
 
           {/* STEP: 完了 */}
           {step === 'done' && (
-            <PostComplete onClose={onClose} uploadError={uploadError} />
+            <PostComplete
+              onClose={onClose}
+              uploadError={uploadError}
+              mapsUrl={selectedStore?.mapsUrl}
+              storeName={selectedStore?.name}
+            />
           )}
         </div>
       </div>
