@@ -24,9 +24,19 @@ export default function Header() {
   return (
     <header className="bg-orange-500 text-white shadow-md sticky top-0 z-50">
       <div className="max-w-2xl mx-auto px-4 flex items-center justify-between h-16">
-        <Link href="/" className="text-xl font-bold tracking-wide flex items-center gap-2 min-h-0 min-w-0">
-          🐱 ねこ寄り道
-        </Link>
+        <div className="flex items-center gap-2 min-w-0">
+          <Link href="/" className="text-xl font-bold tracking-wide flex items-center gap-2 min-h-0 min-w-0">
+            🐱 ねこ寄り道
+          </Link>
+          <a
+            href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent('https://nyanko.fun')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs bg-green-500 hover:bg-green-600 active:bg-green-700 text-white px-2 py-1 rounded-full font-bold whitespace-nowrap transition-colors"
+          >
+            教えたいにゃん
+          </a>
+        </div>
         <nav className="flex items-center gap-3">
           {loggedIn ? (
             <>
