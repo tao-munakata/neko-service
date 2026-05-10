@@ -23,6 +23,7 @@ jobs:
 
             # 最新コードを取得（サーバーのローカル変更は破棄）
             git fetch origin main
+            git fetch --tags
             git reset --hard origin/main
 
             # バックエンドをビルド・再起動
