@@ -104,9 +104,6 @@ export default function HomePage() {
               送る
             </a>
           </div>
-          <p className="text-gray-300 text-xs mt-1">
-            {process.env.NEXT_PUBLIC_APP_VERSION}
-          </p>
         </div>
 
         <PostFeed />
