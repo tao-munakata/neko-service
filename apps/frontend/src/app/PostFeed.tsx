@@ -23,6 +23,7 @@ export default function PostFeed() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallBtn, setShowInstallBtn] = useState(false);
   const [isIos, setIsIos] = useState(false);
+  const [showIosHint, setShowIosHint] = useState(false);
 
   useEffect(() => {
     const standalone = window.matchMedia('(display-mode: standalone)').matches
@@ -47,7 +48,7 @@ export default function PostFeed() {
 
   async function handleInstall() {
     if (isIos) {
-      alert('Safari の共有ボタン → 「ホーム画面に追加」を選んでください');
+      setShowIosHint(true);
       return;
     }
     if (!installPrompt) return;
@@ -129,6 +130,30 @@ export default function PostFeed() {
             ))}
           </div>
         </>
+      )}
+
+      {/* iOS ホーム画面追加の案内トースト */}
+      {showIosHint && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-6 px-4">
+          <div className="bg-gray-900 text-white rounded-2xl px-5 py-4 max-w-sm w-full shadow-2xl">
+            <div className="flex items-start justify-between mb-3">
+              <p className="font-bold text-sm">ホーム画面に追加する方法</p>
+              <button onClick={() => setShowIosHint(false)} className="text-gray-400 text-lg leading-none ml-3">✕</button>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-gray-200">
+              <span className="text-2xl flex-shrink-0">
+                <svg viewBox="0 0 24 24" className="w-7 h-7 fill-none stroke-white stroke-2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 12H16M12 8v8M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                </svg>
+              </span>
+              <p>下の<strong>共有ボタン</strong>をタップして<br />「<strong>ホーム画面に追加</strong>」を選択</p>
+            </div>
+            <div className="mt-3 flex justify-center">
+              <div className="text-gray-400 text-xs">↓ Safari のツールバー</div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
