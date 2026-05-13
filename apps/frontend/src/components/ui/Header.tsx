@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import { isLoggedIn, clearAuth, getUser } from '@/lib/auth';
 import { useEffect, useState } from 'react';
@@ -28,6 +29,24 @@ export default function Header() {
           <Link href="/" className="text-xl font-bold tracking-wide flex items-center gap-2 min-h-0 min-w-0">
             🐱 ねこ寄り道
           </Link>
+          {/* スマホのみ表示 */}
+          <div className="block md:hidden">
+            <div
+              className="line-it-button"
+              data-lang="ja"
+              data-type="share-b"
+              data-env="PROD"
+              data-url="https://nyanko.fun"
+              data-color="default"
+              data-size="large"
+              data-count="true"
+              data-ver="3"
+            />
+            <Script
+              src="https://www.line-website.com/social-plugins/js/thirdparty/loader.min.js"
+              strategy="afterInteractive"
+            />
+          </div>
         </div>
         <nav className="flex items-center gap-3">
           {loggedIn ? (
