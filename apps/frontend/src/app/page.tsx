@@ -14,6 +14,13 @@ export default function HomePage() {
   const [showPhotoPost, setShowPhotoPost] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [lineShareUrl, setLineShareUrl] = useState('https://social-plugins.line.me/lineit/share?url=https%3A%2F%2Fnyanko.fun');
+
+  useEffect(() => {
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      setLineShareUrl('https://line.me/R/msg/text/?' + encodeURIComponent('https://nyanko.fun'));
+    }
+  }, []);
 
   useEffect(() => {
     if (isLoggedIn()) {
@@ -86,7 +93,7 @@ export default function HomePage() {
               地元のご馳走・お福分け
             </p>
             <a
-              href="https://social-plugins.line.me/lineit/share?url=https%3A%2F%2Fnyanko.fun"
+              href={lineShareUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="md:hidden flex items-center gap-1 bg-[#06C755] text-white text-xs font-bold px-3 py-1.5 rounded-full"
