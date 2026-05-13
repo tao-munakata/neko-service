@@ -21,21 +21,39 @@ export default function PostFeed() {
   const [categoryId, setCategoryId] = useState(0);
   const [loading, setLoading] = useState(true);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
+  const [isIos, setIsIos] = useState(false);
 
   useEffect(() => {
+    const standalone = window.matchMedia('(display-mode: standalone)').matches
+      || ('standalone' in navigator && (navigator as { standalone?: boolean }).standalone === true);
+    if (standalone) return;
+
+    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    setIsIos(ios);
+    if (ios) {
+      setShowInstallBtn(true);
+      return;
+    }
+
     const handler = (e: Event) => {
       e.preventDefault();
       setInstallPrompt(e as BeforeInstallPromptEvent);
+      setShowInstallBtn(true);
     };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
   async function handleInstall() {
+    if (isIos) {
+      alert('Safari の共有ボタン → 「ホーム画面に追加」を選んでください');
+      return;
+    }
     if (!installPrompt) return;
     await installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
-    if (outcome === 'accepted') setInstallPrompt(null);
+    if (outcome === 'accepted') setShowInstallBtn(false);
   }
 
   useEffect(() => {
@@ -92,7 +110,7 @@ export default function PostFeed() {
         <>
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-gray-400">{total}件の投稿にゃん</p>
-            {installPrompt && (
+            {showInstallBtn && (
               <button
                 onClick={handleInstall}
                 className="md:hidden flex items-center gap-1 bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full"
