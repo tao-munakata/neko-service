@@ -4,6 +4,11 @@ import api from '@/lib/api';
 import PostCard from '@/components/post/PostCard';
 import type { Post, PostsResponse } from '@/types';
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+};
+
 const CATEGORIES = [
   { id: 0, name: 'すべて', emoji: '🐱' },
   { id: 1, name: '昭和の喫茶店', emoji: '☕' },
@@ -15,6 +20,23 @@ export default function PostFeed() {
   const [total, setTotal] = useState(0);
   const [categoryId, setCategoryId] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  async function handleInstall() {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') setInstallPrompt(null);
+  }
 
   useEffect(() => {
     setLoading(true);
@@ -68,7 +90,21 @@ export default function PostFeed() {
         </div>
       ) : (
         <>
-          <p className="text-sm text-gray-400 mb-4">{total}件の投稿にゃん</p>
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-gray-400">{total}件の投稿にゃん</p>
+            {installPrompt && (
+              <button
+                onClick={handleInstall}
+                className="md:hidden flex items-center gap-1 bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 18V6M12 6l-4 4M12 6l4 4" />
+                  <rect x="3" y="18" width="18" height="3" rx="1" />
+                </svg>
+                スマホに追加
+              </button>
+            )}
+          </div>
           <div className="flex flex-col gap-4">
             {posts.map((post) => (
               <PostCard key={post.id} post={post} />
