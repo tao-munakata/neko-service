@@ -26,19 +26,39 @@ export class PlacesService {
       return [];
     }
 
+    // restaurant と cafe を並列検索してマージ（喫茶店はcafeタイプのため両方必要）
+    const [restaurants, cafes] = await Promise.all([
+      this.fetchNearbyByType(lat, lng, 'restaurant'),
+      this.fetchNearbyByType(lat, lng, 'cafe'),
+    ]);
+
+    const seen = new Set<string>();
+    return [...restaurants, ...cafes]
+      .filter((p) => {
+        if (seen.has(p.placeId)) return false;
+        seen.add(p.placeId);
+        return true;
+      })
+      .slice(0, 3);
+  }
+
+  private async fetchNearbyByType(lat: number, lng: number, type: string): Promise<PlaceCandidate[]> {
     const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
     url.searchParams.set('location', `${lat},${lng}`);
-    url.searchParams.set('radius', '500');          // 500m以内
-    url.searchParams.set('type', 'restaurant');
+    url.searchParams.set('radius', '500');
+    url.searchParams.set('type', type);
     url.searchParams.set('language', 'ja');
     url.searchParams.set('key', this.apiKey);
 
     const res = await fetch(url.toString());
-    if (!res.ok) throw new Error(`Places API error: ${res.status}`);
+    if (!res.ok) {
+      this.logger.warn(`Places API error: ${res.status} (type=${type})`);
+      return [];
+    }
     const data = await res.json() as PlacesNearbyResponse;
 
     if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-      this.logger.warn(`Places API status: ${data.status} / ${data.error_message ?? 'no message'}`);
+      this.logger.warn(`Places API status: ${data.status} (type=${type}) / ${data.error_message ?? 'no message'}`);
       return [];
     }
 

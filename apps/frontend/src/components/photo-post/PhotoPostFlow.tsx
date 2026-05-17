@@ -83,7 +83,11 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
         try {
           const res = await api.post('/places/nearby', { lat: gps.lat, lng: gps.lng });
           setCandidates(res.data.candidates ?? []);
-        } catch { /* ignore */ }
+        } catch (err) {
+          console.error('Places API error:', err);
+        }
+      } else {
+        console.warn('GPS取得失敗: 店舗検索をスキップ');
       }
     } finally {
       setIsSearching(false);
