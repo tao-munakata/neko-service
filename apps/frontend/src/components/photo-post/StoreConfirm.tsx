@@ -6,10 +6,11 @@ interface Props {
   imagePreviewUrl: string | null;
   candidates: PlaceCandidate[];
   isSearching: boolean;
+  noGps?: boolean;
   onSelect: (store: SelectedStore | null) => void;
 }
 
-export default function StoreConfirm({ imagePreviewUrl, candidates, isSearching, onSelect }: Props) {
+export default function StoreConfirm({ imagePreviewUrl, candidates, isSearching, noGps, onSelect }: Props) {
   const [showList, setShowList] = useState(false);
   const top = candidates[0] ?? null;
 
@@ -92,7 +93,14 @@ export default function StoreConfirm({ imagePreviewUrl, candidates, isSearching,
         /* お店が見つからなかった場合 */
         <>
           <div className="text-center py-4 mb-4">
-            <p className="text-xl text-gray-600">近くのお店が見つからなかったにゃん…</p>
+            {noGps ? (
+              <>
+                <p className="text-xl text-gray-600 mb-2">位置情報を取得できなかったにゃん…</p>
+                <p className="text-sm text-gray-400">ブラウザの「位置情報」アクセスを許可すると、近くのお店を自動で探せるにゃん</p>
+              </>
+            ) : (
+              <p className="text-xl text-gray-600">近くのお店が見つからなかったにゃん…</p>
+            )}
           </div>
           <button
             onClick={() => onSelect(null)}

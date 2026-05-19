@@ -46,7 +46,7 @@ async function getCurrentGps(): Promise<{ lat: number; lng: number } | null> {
     navigator.geolocation.getCurrentPosition(
       (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       () => resolve(null),
-      { timeout: 8000 },
+      { timeout: 12000 },
     );
   });
 }
@@ -62,21 +62,23 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number>(categoryId ?? 1);
   const [isSearching, setIsSearching] = useState(false);
   const [uploadError, setUploadError] = useState(false);
+  const [noGps, setNoGps] = useState(false);
   async function handleFileSelect(file: File) {
     setImageFile(file);
     setImagePreviewUrl(URL.createObjectURL(file));
     setIsSearching(true);
+    setNoGps(false);
     setStep('store');
 
     try {
       // iOS では位置情報許可ダイアログ待ちで getCurrentPosition が無限待機することがあるため
-      // 10秒のハードタイムアウトを設ける
+      // 15秒のハードタイムアウトを設ける
       const gps = await Promise.race<{ lat: number; lng: number } | null>([
         (async () => {
           const exifGps = await extractGps(file);
           return exifGps ?? await getCurrentGps();
         })(),
-        new Promise<null>((resolve) => setTimeout(() => resolve(null), 10000)),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 15000)),
       ]);
 
       if (gps) {
@@ -88,6 +90,7 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
         }
       } else {
         console.warn('GPS取得失敗: 店舗検索をスキップ');
+        setNoGps(true);
       }
     } finally {
       setIsSearching(false);
@@ -195,6 +198,7 @@ export default function PhotoPostFlow({ categoryId, onClose }: Props) {
               imagePreviewUrl={imagePreviewUrl}
               candidates={candidates}
               isSearching={isSearching}
+              noGps={noGps}
               onSelect={handleStoreSelected}
             />
           )}
