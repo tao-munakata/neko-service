@@ -1,18 +1,15 @@
 'use client';
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
 interface Props {
   catCharacter: string;
 }
 
 export default function Step4Complete({ catCharacter }: Props) {
-  const router = useRouter();
-
   useEffect(() => {
-    const t = setTimeout(() => router.push('/'), 4000);
+    const t = setTimeout(() => { window.location.href = '/'; }, 4000);
     return () => clearTimeout(t);
-  }, [router]);
+  }, []);
 
   return (
     <div className="text-center px-4 py-8">

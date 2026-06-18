@@ -38,7 +38,7 @@ export default function LoginPage() {
         } as AuthResponse);
         setCatCharacter(data.catCharacter ?? data.nickname ?? '');
         setScreen('welcome_back');
-        setTimeout(() => router.replace('/'), 2000);
+        setTimeout(() => { window.location.replace('/'); }, 2000);
       } else {
         setScreen('select');
       }
