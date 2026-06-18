@@ -27,4 +27,5 @@ export default () => ({
   googlePlaces: {
     apiKey: process.env.GOOGLE_PLACES_API_KEY || '',
   },
+  adminSecret: process.env.ADMIN_SECRET || '',
 });

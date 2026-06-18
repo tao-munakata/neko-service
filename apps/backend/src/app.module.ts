@@ -10,6 +10,7 @@ import { PostsModule } from './modules/posts/posts.module';
 import { ReactionsModule } from './modules/reactions/reactions.module';
 import { EventsModule } from './modules/events/events.module';
 import { PlacesModule } from './modules/places/places.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -24,6 +25,7 @@ import { HealthController } from './health.controller';
     ReactionsModule,
     EventsModule,
     PlacesModule,
+    AdminModule,
   ],
   controllers: [HealthController],
 })
