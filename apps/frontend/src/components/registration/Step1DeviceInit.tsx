@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
-import { getDeviceFingerprint, getUserAgent } from '@/lib/device';
+import { getDeviceId, getUserAgent } from '@/lib/device';
 import { saveAuth } from '@/lib/auth';
 import type { AuthResponse } from '@/types';
 
@@ -19,7 +19,7 @@ export default function Step1DeviceInit({ onNext, onAlreadyRegistered }: Props) 
   useEffect(() => {
     (async () => {
       try {
-        const fingerprint = await getDeviceFingerprint();
+        const fingerprint = getDeviceId();
         const ua = getUserAgent();
         const res = await api.post('/registration/init', {
           deviceFingerprint: fingerprint,

@@ -5,7 +5,7 @@ import Header from '@/components/ui/Header';
 import PostFeed from './PostFeed';
 import PhotoPostFlow from '@/components/photo-post/PhotoPostFlow';
 import { isLoggedIn, saveAuth } from '@/lib/auth';
-import { getDeviceFingerprint, getUserAgent } from '@/lib/device';
+import { getDeviceId, getUserAgent } from '@/lib/device';
 import api from '@/lib/api';
 import type { AuthResponse } from '@/types';
 
@@ -38,7 +38,7 @@ export default function HomePage() {
     // 未ログインならデバイス指紋でサイレントログイン試行
     (async () => {
       try {
-        const fingerprint = await getDeviceFingerprint();
+        const fingerprint = getDeviceId();
         const ua = getUserAgent();
         const res = await api.post('/registration/init', {
           deviceFingerprint: fingerprint,

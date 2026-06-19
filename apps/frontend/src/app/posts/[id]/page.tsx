@@ -6,7 +6,7 @@ import PostCard from '@/components/post/PostCard';
 import VoicePostForm from '@/components/voice/VoicePostForm';
 import api from '@/lib/api';
 import { isLoggedIn, saveAuth } from '@/lib/auth';
-import { getDeviceFingerprint, getUserAgent } from '@/lib/device';
+import { getDeviceId, getUserAgent } from '@/lib/device';
 import type { Post, AuthResponse } from '@/types';
 
 const REACTION_LABELS: Record<string, string> = {
@@ -48,7 +48,7 @@ export default function PostDetailPage() {
   async function ensureLoggedIn(): Promise<boolean> {
     if (isLoggedIn()) return true;
     try {
-      const fingerprint = await getDeviceFingerprint();
+      const fingerprint = getDeviceId();
       const ua = getUserAgent();
       const res = await api.post('/registration/init', { deviceFingerprint: fingerprint, userAgent: ua });
       const { status, data, accessToken, refreshToken } = res.data;

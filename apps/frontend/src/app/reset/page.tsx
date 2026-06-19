@@ -6,6 +6,7 @@ export default function ResetPage() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
+    localStorage.removeItem('deviceId');
     window.location.replace('/login');
   }, []);
 
