@@ -18,15 +18,13 @@ export default function LoginPage() {
     setScreen('checking');
     try {
       const identity = collectDeviceIdentity();
-      const res = await api.post('/registration/init', {
+      // device-login は既知デバイスのみを確認し、未登録なら 401 を返す
+      // /registration/init は新規ユーザーを作成するため登録ページ専用
+      const res = await api.post('/registration/device-login', {
         deviceFingerprint: identity.deviceId,
-        userAgent: identity.userAgent,
-        screenResolution: identity.screenResolution,
-        timezone: identity.timezone,
-        language: identity.language,
       });
-      const { status, data, accessToken, refreshToken } = res.data;
-      if (status === 'already_registered' && accessToken) {
+      const { data, accessToken, refreshToken } = res.data;
+      if (accessToken) {
         saveAuth({
           accessToken,
           refreshToken,
@@ -45,6 +43,7 @@ export default function LoginPage() {
         setScreen('select');
       }
     } catch {
+      // 未登録デバイス(401)を含む全エラーは選択画面へ
       setScreen('select');
     }
   }
