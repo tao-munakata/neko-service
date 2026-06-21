@@ -19,6 +19,22 @@ export class LoginDto {
 
   @IsString()
   password: string;
+
+  @IsOptional()
+  @IsString()
+  deviceId?: string;
+
+  @IsOptional()
+  @IsString()
+  screenResolution?: string;
+
+  @IsOptional()
+  @IsString()
+  timezone?: string;
+
+  @IsOptional()
+  @IsString()
+  language?: string;
 }
 
 export class RefreshDto {

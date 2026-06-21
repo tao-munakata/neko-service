@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
+import { DeviceLogModule } from './common/device-log/device-log.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AiModule } from './modules/ai/ai.module';
 import { VoiceModule } from './modules/voice/voice.module';
@@ -18,6 +19,7 @@ import { HealthController } from './health.controller';
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
     DatabaseModule,
+    DeviceLogModule,
     AuthModule,
     AiModule,
     VoiceModule,

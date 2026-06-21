@@ -5,12 +5,14 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../users/user.entity';
+import { DeviceLogService } from '../../common/device-log/device-log.service';
 
 @Controller('admin')
 export class AdminController {
   constructor(
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     private readonly config: ConfigService,
+    private readonly deviceLog: DeviceLogService,
   ) {}
 
   private authorize(secret: string | undefined) {
@@ -40,5 +42,15 @@ export class AdminController {
     if (!user) return { deleted: false, message: 'User not found' };
     await this.userRepo.delete(id);
     return { deleted: true, id };
+  }
+
+  @Get('device-logs')
+  getDeviceLogs(@Headers('x-admin-secret') secret: string | undefined) {
+    this.authorize(secret);
+    return {
+      active: this.deviceLog.isActive(),
+      expiresAt: '2026-07-22T00:00:00Z',
+      logs: this.deviceLog.getAll(),
+    };
   }
 }

@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { saveAuth, isLoggedIn } from '@/lib/auth';
-import { getDeviceId, getUserAgent } from '@/lib/device';
+import { collectDeviceIdentity } from '@/lib/device-identity/collector';
 import type { AuthResponse } from '@/types';
 
 type Screen = 'checking' | 'welcome_back' | 'select';
@@ -17,11 +17,13 @@ export default function LoginPage() {
   async function tryDeviceLogin() {
     setScreen('checking');
     try {
-      const fingerprint = getDeviceId();
-      const ua = getUserAgent();
+      const identity = collectDeviceIdentity();
       const res = await api.post('/registration/init', {
-        deviceFingerprint: fingerprint,
-        userAgent: ua,
+        deviceFingerprint: identity.deviceId,
+        userAgent: identity.userAgent,
+        screenResolution: identity.screenResolution,
+        timezone: identity.timezone,
+        language: identity.language,
       });
       const { status, data, accessToken, refreshToken } = res.data;
       if (status === 'already_registered' && accessToken) {

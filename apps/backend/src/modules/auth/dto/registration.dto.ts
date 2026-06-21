@@ -8,6 +8,18 @@ export class InitRegistrationDto {
   @IsOptional()
   @IsString()
   userAgent?: string;
+
+  @IsOptional()
+  @IsString()
+  screenResolution?: string;
+
+  @IsOptional()
+  @IsString()
+  timezone?: string;
+
+  @IsOptional()
+  @IsString()
+  language?: string;
 }
 
 export class VoiceRegistrationDto {
