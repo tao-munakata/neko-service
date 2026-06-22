@@ -131,7 +131,6 @@ export default function Step2Voice({ userId, catCharacter, onNext }: Props) {
   }
 
   async function handleSkip() {
-    await api.post('/registration/voice', { userId, voiceRegistered: false });
     onNext();
   }
 

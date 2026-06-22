@@ -20,23 +20,23 @@ export default function LoginPage() {
       const identity = collectDeviceIdentity();
       // device-login は既知デバイスのみを確認し、未登録なら 401 を返す
       // /registration/init は新規ユーザーを作成するため登録ページ専用
-      const res = await api.post('/registration/device-login', {
-        deviceFingerprint: identity.deviceId,
+      const res = await api.post('/auth/device-login', {
+        deviceId: identity.deviceId,
       });
-      const { data, accessToken, refreshToken } = res.data;
+      const { accessToken, refreshToken, user } = res.data;
       if (accessToken) {
         saveAuth({
           accessToken,
           refreshToken,
           user: {
-            id: data.userId,
-            nickname: data.nickname ?? data.catCharacter,
+            id: user.id,
+            nickname: user.nickname,
             email: null,
             membershipTier: 'member',
-            avatarUrl: null,
+            avatarUrl: user.avatarUrl ?? null,
           },
         } as AuthResponse);
-        setCatCharacter(data.catCharacter ?? data.nickname ?? '');
+        setCatCharacter(user.catCharacter ?? user.nickname ?? '');
         setScreen('welcome_back');
         setTimeout(() => { window.location.replace('/'); }, 2000);
       } else {

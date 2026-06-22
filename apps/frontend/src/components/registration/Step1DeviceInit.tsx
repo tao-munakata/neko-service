@@ -19,25 +19,22 @@ export default function Step1DeviceInit({ onNext, onAlreadyRegistered }: Props) 
   useEffect(() => {
     (async () => {
       try {
-        const fingerprint = getDeviceId();
-        const ua = getUserAgent();
-        const res = await api.post('/registration/init', {
-          deviceFingerprint: fingerprint,
-          userAgent: ua,
-        });
-        const { status, data, nekoMessage: msg, accessToken, refreshToken } = res.data;
+        const deviceId = getDeviceId();
+        const userAgent = getUserAgent();
+        const res = await api.post('/auth/register', { deviceId, userAgent });
+        const { status, accessToken, refreshToken, user } = res.data;
 
-        setNekoMessage(msg);
+        saveAuth({ accessToken, refreshToken, user: { ...user, email: null, membershipTier: 'member' as const } } as AuthResponse);
 
-        if (status === 'already_registered' && accessToken) {
-          // サイレントログイン完了
-          saveAuth({ accessToken, refreshToken, user: { id: data.userId, nickname: data.nickname ?? data.catCharacter, email: null, membershipTier: 'member', avatarUrl: null } } as AuthResponse);
+        if (status === 'already_registered') {
           onAlreadyRegistered();
           return;
         }
 
-        setCatCharacter(data.catCharacter);
-        setTimeout(() => onNext(data.userId, data.catCharacter), 3500);
+        const cat = user.catCharacter ?? user.nickname;
+        setCatCharacter(cat);
+        setNekoMessage(`こんにちはにゃん！今日から君は「${cat}」だにゃん！`);
+        setTimeout(() => onNext(user.id, cat), 3500);
       } catch {
         setError('もう一回やってみるにゃん');
         setLoading(false);
@@ -52,9 +49,7 @@ export default function Step1DeviceInit({ onNext, onAlreadyRegistered }: Props) 
           <div className="text-8xl mb-6 animate-bounce">🐱</div>
           {catCharacter ? (
             <>
-              <p className="text-3xl font-bold text-gray-800 mb-4">
-                「{catCharacter}」
-              </p>
+              <p className="text-3xl font-bold text-gray-800 mb-4">「{catCharacter}」</p>
               <p className="text-xl text-orange-600 leading-relaxed">{nekoMessage}</p>
               <p className="mt-6 text-gray-400 text-base">次のステップに進むにゃん…</p>
             </>

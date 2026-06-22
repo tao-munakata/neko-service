@@ -1,43 +1,36 @@
-import { IsEmail, IsString, Length, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsBoolean } from 'class-validator';
 
-export class RegisterDto {
+export class DeviceRegisterDto {
   @IsString()
-  @Length(1, 50)
-  nickname: string;
+  @IsNotEmpty()
+  deviceId: string;
 
-  @IsEmail()
-  email: string;
-
+  @IsOptional()
   @IsString()
-  @Length(8, 100)
-  password: string;
+  userAgent?: string;
 }
 
-export class LoginDto {
-  @IsEmail()
-  email: string;
-
+export class DeviceLoginDto {
   @IsString()
-  password: string;
+  @IsNotEmpty()
+  deviceId: string;
+}
+
+export class ProfileUpdateDto {
+  @IsOptional()
+  @IsNumber()
+  lat?: number;
 
   @IsOptional()
-  @IsString()
-  deviceId?: string;
+  @IsNumber()
+  lng?: number;
 
-  @IsOptional()
-  @IsString()
-  screenResolution?: string;
-
-  @IsOptional()
-  @IsString()
-  timezone?: string;
-
-  @IsOptional()
-  @IsString()
-  language?: string;
+  @IsBoolean()
+  mapsConsent: boolean;
 }
 
 export class RefreshDto {
   @IsString()
+  @IsNotEmpty()
   refreshToken: string;
 }

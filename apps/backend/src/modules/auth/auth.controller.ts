@@ -1,7 +1,10 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Req } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { DeviceLogService } from '../../common/device-log/device-log.service';
-import { RegisterDto, LoginDto, RefreshDto } from './dto/auth.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { DeviceRegisterDto, DeviceLoginDto, ProfileUpdateDto, RefreshDto } from './dto/auth.dto';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { User } from '../users/user.entity';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractIp(req: any): string {
@@ -16,21 +19,36 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  register(@Body() dto: RegisterDto) {
+  @HttpCode(HttpStatus.OK)
+  register(@Body() dto: DeviceRegisterDto, @Req() req: any) {
+    this.deviceLog.record('registration_init', extractIp(req), {
+      deviceId: dto.deviceId,
+      userAgent: dto.userAgent ?? req.headers?.['user-agent'] ?? 'unknown',
+      screenResolution: null,
+      timezone: null,
+      language: null,
+    });
     return this.authService.register(dto);
   }
 
-  @Post('login')
+  @Post('device-login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() dto: LoginDto, @Req() req: any) {
-    this.deviceLog.record('email_login', extractIp(req), {
-      deviceId: dto.deviceId ?? null,
+  deviceLogin(@Body() dto: DeviceLoginDto, @Req() req: any) {
+    this.deviceLog.record('device_login', extractIp(req), {
+      deviceId: dto.deviceId,
       userAgent: req.headers?.['user-agent'] ?? 'unknown',
-      screenResolution: dto.screenResolution ?? null,
-      timezone: dto.timezone ?? null,
-      language: dto.language ?? null,
+      screenResolution: null,
+      timezone: null,
+      language: null,
     });
-    return this.authService.login(dto);
+    return this.authService.deviceLogin(dto);
+  }
+
+  @Post('profile')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  updateProfile(@Body() dto: ProfileUpdateDto, @CurrentUser() user: User) {
+    return this.authService.updateProfile(user.id, dto);
   }
 
   @Post('refresh')

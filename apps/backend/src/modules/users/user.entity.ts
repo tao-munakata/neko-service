@@ -2,9 +2,6 @@ import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn,
 } from 'typeorm';
 
-export type MembershipTier = 'guest' | 'member' | 'premium';
-export type AuthMethod = 'device' | 'email';
-
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -16,23 +13,8 @@ export class User {
   @Column({ name: 'cat_character', type: 'varchar', length: 100, nullable: true })
   catCharacter: string | null;
 
-  @Column({ name: 'phone_number', type: 'varchar', length: 20, nullable: true })
-  phoneNumber: string | null;
-
-  @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
-  email: string | null;
-
   @Column({ name: 'avatar_url', type: 'text', nullable: true })
   avatarUrl: string | null;
-
-  @Column({ name: 'membership_tier', type: 'varchar', default: 'member' })
-  membershipTier: MembershipTier;
-
-  @Column({ type: 'text', nullable: true, select: false })
-  password: string | null;
-
-  @Column({ name: 'auth_method', type: 'varchar', default: 'device' })
-  authMethod: AuthMethod;
 
   @Column({ name: 'device_fingerprint', type: 'varchar', length: 255, nullable: true, unique: true })
   deviceFingerprint: string | null;

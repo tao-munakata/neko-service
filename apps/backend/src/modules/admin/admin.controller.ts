@@ -26,7 +26,7 @@ export class AdminController {
   async listDevices(@Headers('x-admin-secret') secret: string | undefined) {
     this.authorize(secret);
     const users = await this.userRepo.find({
-      select: ['id', 'nickname', 'catCharacter', 'deviceFingerprint', 'authMethod', 'createdAt', 'lastActiveAt'],
+      select: ['id', 'nickname', 'catCharacter', 'deviceFingerprint', 'createdAt', 'lastActiveAt'],
       order: { createdAt: 'DESC' },
     });
     return users;

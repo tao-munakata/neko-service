@@ -1,8 +1,6 @@
 'use client';
 import { useState } from 'react';
 import api from '@/lib/api';
-import { saveAuth } from '@/lib/auth';
-import type { AuthResponse } from '@/types';
 
 interface Props {
   userId: string;
@@ -10,7 +8,7 @@ interface Props {
   onNext: () => void;
 }
 
-export default function Step3Location({ userId, catCharacter, onNext }: Props) {
+export default function Step3Location({ catCharacter, onNext }: Props) {
   const [state, setState] = useState<'idle' | 'loading' | 'confirm' | 'done' | 'error'>('idle');
   const [mapsConsent, setMapsConsent] = useState<boolean | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -23,36 +21,21 @@ export default function Step3Location({ userId, catCharacter, onNext }: Props) {
         navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 })
       );
       setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      setState('confirm');
     } catch {
-      // 位置情報取得失敗 → 同意フラグだけ保存して続行
-      setState('confirm');
+      // 取得失敗でも続行
     }
+    setState('confirm');
   }
 
   async function handleSubmit() {
     if (mapsConsent === null) return;
     setState('loading');
     try {
-      const res = await api.post('/registration/location', {
-        userId,
+      await api.post('/auth/profile', {
         lat: coords?.lat ?? null,
         lng: coords?.lng ?? null,
-        locationConsent: true,
         mapsConsent,
       });
-      const { accessToken, refreshToken, data } = res.data;
-      saveAuth({
-        accessToken,
-        refreshToken,
-        user: {
-          id: data.userId,
-          nickname: catCharacter,
-          email: null,
-          membershipTier: 'member',
-          avatarUrl: null,
-        },
-      } as AuthResponse);
       setState('done');
       setTimeout(onNext, 2000);
     } catch {
@@ -63,14 +46,7 @@ export default function Step3Location({ userId, catCharacter, onNext }: Props) {
 
   async function handleSkip() {
     setState('loading');
-    const res = await api.post('/registration/location', {
-      userId, lat: null, lng: null, locationConsent: false, mapsConsent: false,
-    });
-    const { accessToken, refreshToken, data } = res.data;
-    saveAuth({
-      accessToken, refreshToken,
-      user: { id: data.userId, nickname: catCharacter, email: null, membershipTier: 'member', avatarUrl: null },
-    } as AuthResponse);
+    await api.post('/auth/profile', { lat: null, lng: null, mapsConsent: false });
     onNext();
   }
 
@@ -111,8 +87,6 @@ export default function Step3Location({ userId, catCharacter, onNext }: Props) {
           <p className="text-2xl text-green-600 font-bold mb-6">
             場所を教えてくれてありがとうにゃん！
           </p>
-
-          {/* Google Maps 同意 */}
           <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-5 mb-6 text-left">
             <p className="text-xl font-bold text-gray-800 mb-2">🗺️ Google マップ連動</p>
             <p className="text-lg text-gray-600 leading-relaxed">
@@ -121,7 +95,6 @@ export default function Step3Location({ userId, catCharacter, onNext }: Props) {
               登録してもいいかにゃん？
             </p>
           </div>
-
           <div className="flex gap-3 mb-6">
             <button
               onClick={() => setMapsConsent(true)}
@@ -144,7 +117,6 @@ export default function Step3Location({ userId, catCharacter, onNext }: Props) {
               🙅 今はいいにゃん
             </button>
           </div>
-
           <button
             onClick={handleSubmit}
             disabled={mapsConsent === null}
