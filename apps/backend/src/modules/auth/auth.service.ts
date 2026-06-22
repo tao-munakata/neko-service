@@ -39,6 +39,7 @@ export class AuthService {
       nickname: catCharacter,
       catCharacter,
       deviceFingerprint: dto.deviceId,
+      userAgent: dto.userAgent ?? null,
     });
     await this.userRepo.save(user);
 

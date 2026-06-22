@@ -19,6 +19,9 @@ export class User {
   @Column({ name: 'device_fingerprint', type: 'varchar', length: 255, nullable: true, unique: true })
   deviceFingerprint: string | null;
 
+  @Column({ name: 'user_agent', type: 'text', nullable: true })
+  userAgent: string | null;
+
   @Column({ name: 'voice_registered', type: 'boolean', default: false })
   voiceRegistered: boolean;
 
