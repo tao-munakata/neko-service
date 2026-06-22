@@ -7,7 +7,6 @@ interface DeviceUser {
   nickname: string;
   catCharacter: string | null;
   deviceFingerprint: string | null;
-  authMethod: string;
   createdAt: string;
   lastActiveAt: string;
 }
@@ -165,7 +164,6 @@ export default function AdminPage() {
           <thead>
             <tr style={{ background: '#f7fafc' }}>
               <th style={th}>名前</th>
-              <th style={th}>方式</th>
               <th style={th}>デバイスID</th>
               <th style={th}>登録日</th>
               <th style={th}>最終</th>
@@ -176,12 +174,7 @@ export default function AdminPage() {
             {devices.map((d) => (
               <tr key={d.id} style={{ borderBottom: '1px solid #eee' }}>
                 <td style={td}>{d.catCharacter ?? d.nickname}</td>
-                <td style={td}>
-                  <span style={{ background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', fontSize: '11px' }}>
-                    {d.authMethod}
-                  </span>
-                </td>
-                <td style={{ ...td, maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#718096' }}>
+                <td style={{ ...td, color: '#718096', fontFamily: 'monospace', fontSize: '11px' }}>
                   {d.deviceFingerprint ?? '—'}
                 </td>
                 <td style={td}>{new Date(d.createdAt).toLocaleDateString('ja-JP')}</td>

@@ -106,27 +106,42 @@ export class AuthService {
   }
 
   private async generateCatCharacter(userAgent: string): Promise<string> {
-    try {
-      const msg = await this.anthropic.messages.create({
-        model: this.config.get<string>('anthropic.model') || 'claude-haiku-4-5-20251001',
-        max_tokens: 50,
-        messages: [{
-          role: 'user',
-          content: `日本語の猫キャラクター名を1つだけ生成してください。
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const candidate = await this.generateCandidate(userAgent, attempt);
+      const exists = await this.userRepo.findOne({ where: { catCharacter: candidate } });
+      if (!exists) return candidate;
+      this.logger.warn(`catCharacter "${candidate}" は既に使用中。リトライ ${attempt + 1}`);
+    }
+    // 5回衝突した場合は乱数サフィックスで確実にユニーク化
+    const type = CAT_TYPES[Math.floor(Math.random() * CAT_TYPES.length)];
+    const name = CAT_NAMES[Math.floor(Math.random() * CAT_NAMES.length)];
+    return `${type}の${name}${Math.floor(Math.random() * 900 + 100)}`;
+  }
+
+  private async generateCandidate(userAgent: string, attempt: number): Promise<string> {
+    if (attempt === 0) {
+      try {
+        const msg = await this.anthropic.messages.create({
+          model: this.config.get<string>('anthropic.model') || 'claude-haiku-4-5-20251001',
+          max_tokens: 50,
+          messages: [{
+            role: 'user',
+            content: `日本語の猫キャラクター名を1つだけ生成してください。
 形式: 「猫の種類 + の + 名前」（例: サバトラのニャンタ）
 猫の種類の候補: ${CAT_TYPES.join('、')}
 名前の候補: ${CAT_NAMES.join('、')}
 UserAgent参考: ${userAgent.slice(0, 50)}
 名前だけを返してください。説明不要。`,
-        }],
-      });
-      const content = msg.content[0];
-      if (content.type === 'text') {
-        const name = content.text.trim().replace(/「|」|"/g, '');
-        if (name.length > 0 && name.length <= 20) return name;
+          }],
+        });
+        const content = msg.content[0];
+        if (content.type === 'text') {
+          const name = content.text.trim().replace(/「|」|"/g, '');
+          if (name.length > 0 && name.length <= 20) return name;
+        }
+      } catch (e) {
+        this.logger.warn('Claude API でキャラ名生成失敗、フォールバック使用', e);
       }
-    } catch (e) {
-      this.logger.warn('Claude API でキャラ名生成失敗、フォールバック使用', e);
     }
     const type = CAT_TYPES[Math.floor(Math.random() * CAT_TYPES.length)];
     const name = CAT_NAMES[Math.floor(Math.random() * CAT_NAMES.length)];
